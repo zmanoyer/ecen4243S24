@@ -26,6 +26,7 @@ around: slt  x4, x7, x2         # x4 = (3 < 5)  = 1       28        0023A233
         add  x9, x2, x5         # x9 = (7 + 11) = 18      3C        005104B3
         jal  x3, end            # jump to end, x3 = 0x44  40        008001EF
         addi x2, x0, 1          # shouldn't happen        44        00100113
+
 end:    add  x2, x2, x9         # x2 = (7 + 18)  = 25     48        00910133
         sw   x2, 0x20(x3)       # mem[100] = 25           4C        0221A023 
 done:   beq  x2, x2, done       # infinite loop           50        00210063
