@@ -27,6 +27,7 @@
 
 //   xor          0110011   100       0000000
 //   bne          1100011   001       immediate
+//   lui          0110111   immediate immediate
 
 module testbench();
 

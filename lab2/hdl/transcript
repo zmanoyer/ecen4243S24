@@ -16,7 +16,11 @@
 # ** Warning: (vlib-34) Library already exists at "work".
 # Errors: 0, Warnings: 1
 # Model Technology ModelSim SE-64 vlog 2021.3 Compiler 2021.07 Jul 13 2021
+<<<<<<< HEAD
 # Start time: 15:40:24 on Mar 11,2024
+=======
+# Start time: 15:14:43 on Mar 05,2024
+>>>>>>> 93042ef2c056caead2aca970355a5d6205e57fce
 # vlog -reportprogress 300 riscv_single.sv 
 # -- Compiling module testbench
 # -- Compiling module riscvsingle
@@ -39,10 +43,17 @@
 # Top level modules:
 # 	testbench
 # 	flopenr
+<<<<<<< HEAD
 # End time: 15:40:24 on Mar 11,2024, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -debugdb -voptargs="+acc" work.testbench 
 # Start time: 15:40:25 on Mar 11,2024
+=======
+# End time: 15:14:43 on Mar 05,2024, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vsim -debugdb -voptargs="+acc" work.testbench 
+# Start time: 15:14:44 on Mar 05,2024
+>>>>>>> 93042ef2c056caead2aca970355a5d6205e57fce
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Note: (vsim-8611) Generating debug db.
 # ** Note: (vopt-4301) Memory core inferred for signal 'RAM' width=32, depth=256, type=RAM at location riscv_single.sv:312
@@ -76,5 +87,9 @@
 # Debug data file does not match loaded design.
 #     while executing
 # "add schematic -full sim:/testbench/dut/rv32single"
+<<<<<<< HEAD
 # End time: 15:41:46 on Mar 11,2024, Elapsed time: 0:01:21
+=======
+# End time: 15:20:30 on Mar 05,2024, Elapsed time: 0:05:46
+>>>>>>> 93042ef2c056caead2aca970355a5d6205e57fce
 # Errors: 2, Warnings: 1
