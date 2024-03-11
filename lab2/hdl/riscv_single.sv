@@ -86,7 +86,7 @@ module riscvsingle (input  logic        clk, reset,
    logic 				ALUSrc, RegWrite, Jump, Zero;
    logic [1:0] 				ResultSrc;
    logic [2:0]        ImmSrc;
-   logic [3:0] 				ALUControl;
+   logic [4:0] 				ALUControl;
    
    controller c (Instr[6:0], Instr[14:12], Instr[30], Zero,
 		 ResultSrc, MemWrite, PCSrc,
@@ -109,9 +109,9 @@ module controller (input  logic [6:0] op,
 		   output logic       PCSrc, ALUSrc,
 		   output logic       RegWrite, Jump,
 		   output logic [2:0] ImmSrc,
-		   output logic [3:0] ALUControl);
+		   output logic [4:0] ALUControl);
    
-   logic [1:0] 			      ALUOp;
+   logic [2:0] 			      ALUOp;
    logic 			      Branch;
    
    maindec md (op, ResultSrc, MemWrite, Branch,
@@ -127,7 +127,7 @@ module maindec (input  logic [6:0] op,
 		output logic 	   Branch, ALUSrc,
 		output logic 	   RegWrite, Jump,
 		output logic [2:0] ImmSrc,
-		output logic [1:0] ALUOp);
+		output logic [2:0] ALUOp);
    
    logic [11:0] 		   controls;
    
@@ -153,29 +153,30 @@ endmodule // maindec
 module aludec (input  logic       opb5,
 	       input  logic [2:0] funct3,
 	       input  logic 	  funct7b5,
-	       input  logic [1:0] ALUOp,
-	       output logic [3:0] ALUControl);
+	       input  logic [2:0] ALUOp,
+	       output logic [4:0] ALUControl);
    
    logic 			  RtypeSub;
    
    assign RtypeSub = funct7b5 & opb5; // TRUE for R–type subtract
    always_comb
      case(ALUOp)
-       2'b00: ALUControl = 4'b0000; // addition
-       2'b01: ALUControl = 4'b0001; // subtraction
-       2'b11: ALUControl = 4'b0111; // lui
+       3'b000: ALUControl = 4'b0000; // addition
+       3'b001: ALUControl = 4'b0001; // subtraction
+       3'b011: ALUControl = 4'b0111; // lui
        default: case(funct3) // R–type or I–type ALU
-		  3'b000: if (RtypeSub)
+		  4'b0000: if (RtypeSub)
 		    ALUControl = 4'b0001; // sub
 		  else
 		    ALUControl = 4'b0000; // add, addi
-		  3'b010: ALUControl = 4'b0101; // slt, slti
+		  4'b0010: ALUControl = 4'b0101; // slt, slti
       
-      3'b100: ALUControl = 4'b0100; //xor, xori
-      3'b001: ALUControl = 4'b0001; // sltu
+      4'b0100: ALUControl = 4'b0100; //xor, xori
+      4'b0001: ALUControl = 4'b0001; // sltu
 
-		  3'b110: ALUControl = 4'b0011; // or, ori
-		  3'b111: ALUControl = 4'b0010; // and, andi
+		  4'b0110: ALUControl = 4'b0011; // or, ori
+		  4'b0111: ALUControl = 4'b0010; // and, andi
+      4'b1000: ALUControl = 4'b1000; // sll
 		  default: ALUControl = 4'bxxxx; // ???
 		endcase // case (funct3)       
      endcase // case (ALUOp)
@@ -187,7 +188,7 @@ module datapath (input  logic        clk, reset,
 		 input  logic 	     PCSrc, ALUSrc,
 		 input  logic 	     RegWrite,
 		 input  logic [2:0]  ImmSrc,
-		 input  logic [3:0]  ALUControl,
+		 input  logic [4:0]  ALUControl,
 		 output logic 	     Zero,
 		 output logic [31:0] PC,
 		 input  logic [31:0] Instr,
