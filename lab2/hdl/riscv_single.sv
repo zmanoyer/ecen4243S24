@@ -342,7 +342,7 @@ module alu (input  logic [31:0] a, b,
        4'b0101:  result = sum[31] ^ v; // slt
        //4'b0110:  result = ;          // sltu
        4'b0111:  result = b;           // lui       
-
+       4'b1000:  result = a << ;      //sll
        default: result = 32'bx;
      endcase
 
