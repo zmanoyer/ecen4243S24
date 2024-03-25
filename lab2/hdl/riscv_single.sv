@@ -331,42 +331,42 @@ endmodule
 module blu (input logic Jump,
             input logic [31:0] a, b,
             input logic [2:0] BranchControl,
-            input logic PCSource,
+            input logic PCSrc,
             output logic PCSourceOut);
 
     always_comb
 
-    if(PCSource & !Jump) begin
+    if(PCSrc & !Jump) begin
     case(BranchControl)
       3'b000: begin // BEQ
         if(a == b) 
           PCSourceOut = 1'b1;
-        else PCSource = 1'b0;
+        else PCSrc = 1'b0;
           end
       3'b001: begin // BNE
         if(a != b)
           PCSourceOut = 1'b1;
-        else PCSource = 1'b0;
+        else PCSrc = 1'b0;
           end
       3'b100: begin // BLT
         if(signed'(a) < signed'(b))
           PCSourceOut = 1'b1;
-        else PCSource = 1'b0;
+        else PCSrc = 1'b0;
           end
       3'b101: begin // BGE
         if(signed'(a) >= signed'(b))
           PCSourceOut = 1'b1;
-        else PCSource = 1'b0;
+        else PCSrc = 1'b0;
           end
       3'b110: begin // BLTU
         if(unsigned'(a) < unsigned'(b))
           PCSourceOut = 1'b1;
-        else PCSource = 1'b0;
+        else PCSrc = 1'b0;
           end
       3'b111: begin // BGEU
         if(unsigned'(a) >= unsigned'(b))
           PCSourceOut = 1'b1;
-        else PCSource = 1'b0;
+        else PCSrc = 1'b0;
           end
       default: PCSourceOut = 3'bx; // undefined
     endcase
