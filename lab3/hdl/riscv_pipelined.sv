@@ -147,7 +147,7 @@ module riscv(input  logic        clk, reset,
    logic [6:0] 			 opD;
    logic [2:0] 			 funct3D;
    logic 			 funct7b5D;
-   logic [1:0] 			 ImmSrcD;
+   logic [2:0] 			 ImmSrcD;
    logic 			 ZeroE;
    logic 			 PCSrcE;
    logic [2:0] 			 ALUControlE;
@@ -187,7 +187,7 @@ module controller(input  logic		 clk, reset,
                   input logic [6:0]  opD,
                   input logic [2:0]  funct3D,
                   input logic 	     funct7b5D,
-                  output logic [1:0] ImmSrcD,
+                  output logic [2:0] ImmSrcD,
                   // Execute stage control signals
                   input logic 	     FlushE, 
                   input logic 	     ZeroE, 
@@ -299,7 +299,7 @@ module datapath(input logic clk, reset,
                 output logic [2:0]  funct3D, 
                 output logic 	    funct7b5D,
                 input logic 	    StallD, FlushD,
-                input logic [1:0]   ImmSrcD,
+                input logic [2:0]   ImmSrcD,
                 // Execute stage signals
                 input logic 	    FlushE,
                 input logic [1:0]   ForwardAE, ForwardBE,
@@ -456,7 +456,7 @@ module extend(input  logic [31:7] instr,
        // J-type (jal)
        3'b011:   immext = {{12{instr[31]}}, instr[19:12], instr[20], instr[30:21], 1'b0}; 
        // U-type (auipc)
-       3'b100:   immext = {instr[31:12], 12b'0};
+       3'b100:   immext = {instr[31:12], 12'b0};
        default: immext = 32'bx; // undefined
      endcase             
 endmodule

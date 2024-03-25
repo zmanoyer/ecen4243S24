@@ -13,7 +13,7 @@
 # //
 # do riscv_pipelined.do
 # Model Technology ModelSim SE-64 vlog 2021.3 Compiler 2021.07 Jul 13 2021
-# Start time: 15:51:30 on Mar 25,2024
+# Start time: 16:27:58 on Mar 25,2024
 # vlog -reportprogress 300 riscv_pipelined.sv 
 # -- Compiling module testbench
 # -- Compiling module top
@@ -38,13 +38,13 @@
 # 
 # Top level modules:
 # 	testbench
-# End time: 15:51:30 on Mar 25,2024, Elapsed time: 0:00:00
+# End time: 16:27:58 on Mar 25,2024, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
 # vsim -debugdb -voptargs="+acc" work.testbench 
-# Start time: 15:51:34 on Mar 25,2024
+# Start time: 16:27:58 on Mar 25,2024
 # ** Note: (vsim-3812) Design is being optimized...
 # ** Note: (vsim-8611) Generating debug db.
-# ** Note: (vopt-4301) Memory core inferred for signal 'RAM' width=32, depth=256, type=RAM at location riscv_pipelined.sv:537
+# ** Note: (vopt-4301) Memory core inferred for signal 'RAM' width=32, depth=256, type=RAM at location riscv_pipelined.sv:539
 # Loading sv_std.std
 # Loading work.testbench(fast)
 # Loading work.top(fast)
@@ -71,9 +71,12 @@
 # Loading work.dmem(fast)
 # ** Note: (vsim-8900) Creating design debug database vsim.dbg.
 # ** Error: (vsim-8357) Internal debugDB error id:ct1  ret:1 table context_tbl already exists
-# Simulation succeeded
-# ** Note: $stop    : riscv_pipelined.sv(117)
-#    Time: 275 ns  Iteration: 1  Instance: /testbench
-# Break in Module testbench at riscv_pipelined.sv line 117
 # Debug data file does not match loaded design.
 # Debug data file does not match loaded design.
+# ** Error: Could not open the database because of the following problem accessing the required debug information:
+# Debug data file does not match loaded design.
+# Error in macro ./riscv_pipelined.do line 88
+# Could not open the database because of the following problem accessing the required debug information:
+# Debug data file does not match loaded design.
+#     while executing
+# "add schematic -full sim:/testbench/dut/rv32pipe"
