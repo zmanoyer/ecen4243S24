@@ -388,4 +388,3 @@ module regfile (input  logic        clk,
    assign rd2 = (a2 != 0) ? rf[a2] : 0;
    
 endmodule // regfile
-
