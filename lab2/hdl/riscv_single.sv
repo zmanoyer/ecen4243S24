@@ -86,17 +86,18 @@ module riscvsingle (input  logic        clk, reset,
    logic 				ALUSrc, RegWrite, Jump, AuipcSrc, Zero;
    logic [1:0] 				ResultSrc;
    logic [2:0]        ImmSrc;
+   logic [2:0]        BranchControl;
    logic [3:0] 				ALUControl;
    
    controller c (Instr[6:0], Instr[14:12], Instr[30], Zero,
 		 ResultSrc, MemWrite, PCSrc,
 		 ALUSrc, RegWrite, Jump,
-		 ImmSrc, ALUControl, AuipcSrc);
+		 ImmSrc, ALUControl, AuipcSrc, BranchControl);
    datapath dp (clk, reset, ResultSrc, PCSrc,
 		ALUSrc, RegWrite,
 		ImmSrc, ALUControl,
 		Zero, PC, Instr,
-		ALUResult, WriteData, ReadData, AuipcSrc);
+		ALUResult, WriteData, ReadData, AuipcSrc, BranchControl);
    
 endmodule // riscvsingle
 
@@ -110,14 +111,16 @@ module controller (input  logic [6:0] op,
 		   output logic       RegWrite, Jump,
 		   output logic [2:0] ImmSrc,
 		   output logic [3:0] ALUControl,
-       output logic       AuipcSrc);
+       output logic       AuipcSrc
+       output logic [2:0] BranchControl);
    
    logic [2:0] 			      ALUOp;
-   logic 			      Branch;
+   logic 			      Branch, isBranch;
    
    maindec md (op, ResultSrc, MemWrite, Branch,
 	       ALUSrc, RegWrite, Jump, ImmSrc, ALUOp, AuipcSrc);
    aludec ad (op[5], funct3, funct7b5, ALUOp, ALUControl);
+   branchdec branchdec (Branch, funct3, BranchControl, isBranch);
    assign PCSrc = Branch & (Zero ^ funct3[0]) | Jump;
    
 endmodule // controller
@@ -203,7 +206,8 @@ module datapath (input  logic        clk, reset,
 		 input  logic [31:0] Instr,
 		 output logic [31:0] ALUResult, WriteData,
 		 input  logic [31:0] ReadData,
-     input  logic        AuipcSrc);
+     input  logic        AuipcSrc
+     input  logic [2:0]  BranchControl);
    
    logic [31:0] 		     PCNext, PCPlus4, PCTarget;
    logic [31:0] 		     ImmExt;
@@ -214,6 +218,7 @@ module datapath (input  logic        clk, reset,
    flopr #(32) pcreg (clk, reset, PCNext, PC);
    adder  pcadd4 (PC, 32'd4, PCPlus4);
    adder  pcaddbranch (PC, ImmExt, PCTarget);
+   blu blu (Jump, SrcA, SrcB, BranchControl, PCSrc, PCSrc2);
    mux2 #(32)  pcmux (PCPlus4, PCTarget, PCSrc, PCNext);
    // register file logic
    regfile  rf (clk, RegWrite, Instr[19:15], Instr[24:20],
@@ -294,6 +299,82 @@ module mux3 #(parameter WIDTH = 8)
   assign y = s[1] ? d2 : (s[0] ? d1 : d0);
    
 endmodule // mux3
+
+module branchdec (input logic Branch
+                  input logic [2:0] funct3
+                  output logic [2:0] BranchControl
+                  output logic isBranch);
+
+    always_comb
+
+    if(Branch) begin
+    case(funct3)
+      3'b000: begin BranchControl = 3'b000; // BEQ
+              isBranch = 1'b1; end
+      3'b001: begin BranchControl = 3'b001; // BNE
+              isBranch = 1'b1; end
+      3'b100: begin BranchControl = 3'b100; // BLT
+              isBranch = 1'b1; end
+      3'b101: begin BranchControl = 3'b101; // BGE
+              isBranch = 1'b1; end
+      3'b110: begin BranchControl = 3'b110; //BLTU
+              isBranch = 1'b1; end
+      3'b111: beging BranchControl = 3'b111; //BGEU
+              isBranch = 1'b1; end
+      default: BranchControl = 3'bx;
+      endcase
+      end
+      else isBranch = 1'b0;
+
+endmodule
+
+module blu (input logic Jump,
+            input logic [31:0] a, b,
+            input logic [2:0] BranchControl
+            input logic PCSource
+            output logic PCSourceOut);
+
+    always_comb
+
+    if(PCSource & !Jump) begin
+    case(BranchControl)
+      3'b000: begin // BEQ
+        if(a == b) 
+          PCSourceOut = 1'b1;
+        else PCSource = 1'b0;
+          end
+      3'b001: begin // BNE
+        if(a != b)
+          PCSourceOut = 1'b1;
+        else PCSource = 1'b0;
+          end
+      3'b100: begin // BLT
+        if(signed'(a) < signed'(b))
+          PCSourceOut = 1'b1;
+        else PCSource = 1'b0;
+          end
+      3'b101: begin // BGE
+        if(signed'(a) >= signed'(b))
+          PCSourceOut = 1'b1;
+        else PCSource = 1'b0;
+          end
+      3'b110: begin // BLTU
+        if(unsigned'(a) < unsigned'(b))
+          PCSourceOut = 1'b1;
+        else PCSource = 1'b0;
+          end
+      3'b111: begin // BGEU
+        if(unsigned'(a) >= unsigned'(b))
+          PCSourceOut = 1'b1;
+        else PCSource = 1'b0;
+          end
+      default: PCSourceOut - 3'bx; // undefined
+    endcase
+    end
+    else if (Jump) PCSourceOut = 1'b1;
+    else PCSourceOut = 1'b0;
+    
+endmodule
 
 module top (input  logic        clk, reset,
 	    output logic [31:0] WriteData, DataAdr,
