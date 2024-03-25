@@ -328,7 +328,7 @@ module branchdec (input logic Branch,
 
 endmodule
 
-module blu (input logic Jump,
+module blu (input logic Jump, // testing
             input logic [31:0] a, b,
             input logic [2:0] BranchControl,
             input logic PCSrc,
