@@ -44,7 +44,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../../lab1/testing/auipc.memfile"};
+        memfilename = {"../../lab1/testing/BLT.memfile"};
         $readmemh(memfilename, dut.imem.RAM);
      end
 
@@ -111,7 +111,7 @@ module controller (input  logic [6:0] op,
 		   output logic       RegWrite, Jump,
 		   output logic [2:0] ImmSrc,
 		   output logic [3:0] ALUControl,
-       output logic       AuipcSrc
+       output logic       AuipcSrc,
        output logic [2:0] BranchControl);
    
    logic [2:0] 			      ALUOp;
@@ -206,7 +206,7 @@ module datapath (input  logic        clk, reset,
 		 input  logic [31:0] Instr,
 		 output logic [31:0] ALUResult, WriteData,
 		 input  logic [31:0] ReadData,
-     input  logic        AuipcSrc
+     input  logic        AuipcSrc,
      input  logic [2:0]  BranchControl);
    
    logic [31:0] 		     PCNext, PCPlus4, PCTarget;
@@ -300,9 +300,9 @@ module mux3 #(parameter WIDTH = 8)
    
 endmodule // mux3
 
-module branchdec (input logic Branch
-                  input logic [2:0] funct3
-                  output logic [2:0] BranchControl
+module branchdec (input logic Branch,
+                  input logic [2:0] funct3,
+                  output logic [2:0] BranchControl,
                   output logic isBranch);
 
     always_comb
@@ -319,9 +319,9 @@ module branchdec (input logic Branch
               isBranch = 1'b1; end
       3'b110: begin BranchControl = 3'b110; //BLTU
               isBranch = 1'b1; end
-      3'b111: beging BranchControl = 3'b111; //BGEU
+      3'b111: begin BranchControl = 3'b111; //BGEU
               isBranch = 1'b1; end
-      default: BranchControl = 3'bx;
+      default:BranchControl = 3'bx;
       endcase
       end
       else isBranch = 1'b0;
@@ -330,8 +330,8 @@ endmodule
 
 module blu (input logic Jump,
             input logic [31:0] a, b,
-            input logic [2:0] BranchControl
-            input logic PCSource
+            input logic [2:0] BranchControl,
+            input logic PCSource,
             output logic PCSourceOut);
 
     always_comb
@@ -368,7 +368,7 @@ module blu (input logic Jump,
           PCSourceOut = 1'b1;
         else PCSource = 1'b0;
           end
-      default: PCSourceOut - 3'bx; // undefined
+      default: PCSourceOut = 3'bx; // undefined
     endcase
     end
     else if (Jump) PCSourceOut = 1'b1;
@@ -438,7 +438,7 @@ module alu (input  logic [31:0] a, b,
        4'b1000:  result = a << b[4:0]; // sll
        4'b1001:  result = a >> b[4:0]; // srl
        4'b1010:  result = $signed(a) >>> b[4:0]; //sra
-       4'b1011:  result = ;           // lw
+       //4'b1011:  result = ;           // lw
 
        default: result = 32'bx;
      endcase

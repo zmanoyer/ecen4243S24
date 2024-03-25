@@ -11,35 +11,3 @@
 # //  is prohibited from disclosure under the Trade Secrets Act,
 # //  18 U.S.C. Section 1905.
 # //
-# do riscv_single.do
-# ** Warning: (vdel-134) Unable to remove locked optimized design "_opt".  Locker is jstine@sakuya.ecen.okstate.edu.
-# ** Warning: (vlib-34) Library already exists at "work".
-# Errors: 0, Warnings: 1
-# Model Technology ModelSim SE-64 vlog 2021.3 Compiler 2021.07 Jul 13 2021
-# Start time: 19:44:32 on Mar 23,2024
-# vlog -reportprogress 300 riscv_single.sv 
-# -- Compiling module testbench
-# -- Compiling module riscvsingle
-# -- Compiling module controller
-# -- Compiling module maindec
-# -- Compiling module aludec
-# -- Compiling module datapath
-# -- Compiling module adder
-# -- Compiling module extend
-# -- Compiling module flopr
-# -- Compiling module flopenr
-# -- Compiling module mux2
-# -- Compiling module mux3
-# -- Compiling module top
-# -- Compiling module imem
-# -- Compiling module dmem
-# -- Compiling module alu
-# ** Error: (vlog-13069) riscv_single.sv(360): near ";": syntax error, unexpected ';'.
-# -- Compiling module regfile
-# End time: 19:44:32 on Mar 23,2024, Elapsed time: 0:00:00
-# Errors: 1, Warnings: 0
-# ** Error: C:/modeltech64_2021.3/win64/vlog failed.
-# Error in macro ./riscv_single.do line 30
-# C:/modeltech64_2021.3/win64/vlog failed.
-#     while executing
-# "vlog riscv_single.sv"
