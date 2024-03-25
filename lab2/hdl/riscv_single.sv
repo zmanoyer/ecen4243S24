@@ -328,7 +328,7 @@ module branchdec (input logic Branch,
 
 endmodule
 
-module blu (input logic Jump,
+module blu (input logic Jump, // testing
             input logic [31:0] a, b,
             input logic [2:0] BranchControl,
             input logic PCSrc,
@@ -368,7 +368,11 @@ module blu (input logic Jump,
           PCSrc2 = 1'b1;
         else PCSrc = 1'b0;
           end
+<<<<<<< HEAD
       default: PCSrc = 3'bx; // undefined
+=======
+      default: PCSrc2 = 3'bx; // undefined
+>>>>>>> a2d8aa2526eb3d65d039d3b113c3e23090a91502
     endcase
     end
     else if (Jump) PCSrc2 = 1'b1;
