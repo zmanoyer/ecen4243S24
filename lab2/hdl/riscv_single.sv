@@ -213,12 +213,12 @@ module datapath (input  logic        clk, reset,
    logic [31:0] 		     ImmExt;
    logic [31:0] 		     SrcA, SrcB, SrcA_mux;
    logic [31:0] 		     Result;
+   logic                 PCSrc2;
    
    // next PC logic
    flopr #(32) pcreg (clk, reset, PCNext, PC);
    adder  pcadd4 (PC, 32'd4, PCPlus4);
    adder  pcaddbranch (PC, ImmExt, PCTarget);
-   blu blu (Jump, SrcA, SrcB, BranchControl, PCSrc, PCSrc2);
    mux2 #(32)  pcmux (PCPlus4, PCTarget, PCSrc, PCNext);
    // register file logic
    regfile  rf (clk, RegWrite, Instr[19:15], Instr[24:20],
@@ -326,58 +326,6 @@ module branchdec (input logic Branch,
       end
       else isBranch = 1'b0;
 
-endmodule
-
-module blu (input logic Jump, // testing
-            input logic [31:0] a, b,
-            input logic [2:0] BranchControl,
-            input logic PCSrc,
-            output logic PCSrc2);
-
-    always_comb
-
-    if(PCSrc & !Jump) begin
-    case(BranchControl)
-      3'b000: begin // BEQ
-        if(a == b) 
-          PCSrc2 = 1'b1;
-        else PCSrc = 1'b0;
-          end
-      3'b001: begin // BNE
-        if(a != b)
-          PCSrc2 = 1'b1;
-        else PCSrc = 1'b0;
-          end
-      3'b100: begin // BLT
-        if(signed'(a) < signed'(b))
-          PCSrc2 = 1'b1;
-        else PCSrc = 1'b0;
-          end
-      3'b101: begin // BGE
-        if(signed'(a) >= signed'(b))
-          PCSrc2 = 1'b1;
-        else PCSrc = 1'b0;
-          end
-      3'b110: begin // BLTU
-        if(unsigned'(a) < unsigned'(b))
-          PCSrc2 = 1'b1;
-        else PCSrc = 1'b0;
-          end
-      3'b111: begin // BGEU
-        if(unsigned'(a) >= unsigned'(b))
-          PCSrc2 = 1'b1;
-        else PCSrc = 1'b0;
-          end
-<<<<<<< HEAD
-      default: PCSrc = 3'bx; // undefined
-=======
-      default: PCSrc2 = 3'bx; // undefined
->>>>>>> a2d8aa2526eb3d65d039d3b113c3e23090a91502
-    endcase
-    end
-    else if (Jump) PCSrc2 = 1'b1;
-    else PCSrc2 = 1'b0;
-    
 endmodule
 
 module top (input  logic        clk, reset,
