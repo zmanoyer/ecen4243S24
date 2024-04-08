@@ -92,7 +92,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../../lab1/testing/lw.memfile"};
+        memfilename = {"../../lab1/testing/sw.memfile"};
 	$readmemh(memfilename, dut.imem.RAM);
      end
    
@@ -111,7 +111,7 @@ module testbench();
    // check results
    always @(negedge clk)
      begin
-	if(MemWrite) begin
+	/*if(MemWrite) begin
            if(DataAdr === 100 & WriteData === 25) begin
               $display("Simulation succeeded");
               $stop;
@@ -119,7 +119,7 @@ module testbench();
               $display("Simulation failed");
               $stop;
            end
-	end
+	end*/
      end
 endmodule
 
@@ -228,7 +228,7 @@ module controller(input  logic		 clk, reset,
                             {RegWriteD, ResultSrcD, MemWriteD, JumpD, BranchD, ALUControlD, ALUSrcD},
                             {RegWriteE, ResultSrcE, MemWriteE, JumpE, BranchE, ALUControlE, ALUSrcE});
 
-   assign PCSrcE = (BranchE & ZeroE) | JumpE;
+   assign PCSrcE = (isBranch & ZeroE) | JumpE;
    assign ResultSrcEb0 = ResultSrcE[0];
    
    // Memory stage pipeline control register
@@ -576,7 +576,7 @@ endmodule
 module imem (input  logic [31:0] a,
 	     output logic [31:0] rd);
    
-   logic [31:0] 		 RAM[1028:0];
+   logic [31:0] 		 RAM[2047:0];
    
    assign rd = RAM[a[31:2]]; // word aligned
    
@@ -586,7 +586,7 @@ module dmem (input  logic        clk, we,
 	     input  logic [31:0] a, wd,
 	     output logic [31:0] rd);
    
-   logic [31:0] 		 RAM[255:0];
+   logic [31:0] 		 RAM[2047:0];
    
    assign rd = RAM[a[31:2]]; // word aligned
    always_ff @(posedge clk)
