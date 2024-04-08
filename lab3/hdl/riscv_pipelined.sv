@@ -92,7 +92,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../riscvtest/riscvtest.memfile"};
+        memfilename = {"../../lab1/testing/lw.memfile"};
 	$readmemh(memfilename, dut.imem.RAM);
      end
    
@@ -214,17 +214,17 @@ module controller(input  logic		 clk, reset,
    logic 			     BranchD, BranchE;
    logic           Branch, isBranch;
    logic [2:0] 			     ALUOpD;
-   logic [2:0] 			     ALUControlD;
+   logic [3:0] 			     ALUControlD;
    logic 			     ALUSrcD;
    
    // Decode stage logic
    maindec md(opD, ResultSrcD, MemWriteD, BranchD,
               ALUSrcD, RegWriteD, JumpD, ImmSrcD, ALUOpD, AuipcSrc);
    aludec  ad(opD[5], funct3D, funct7b5D, ALUOpD, ALUControlD);
-   branchdec branchdec (Branch, funct3, BranchControl, isBranch);
+   branchdec branchdec (Branch, funct3D, BranchControl, isBranch);
    
    // Execute stage pipeline control register and logic
-   floprc #(10) controlregE(clk, reset, FlushE,
+   floprc #(11) controlregE(clk, reset, FlushE,
                             {RegWriteD, ResultSrcD, MemWriteD, JumpD, BranchD, ALUControlD, ALUSrcD},
                             {RegWriteE, ResultSrcE, MemWriteE, JumpE, BranchE, ALUControlE, ALUSrcE});
 
@@ -576,7 +576,7 @@ endmodule
 module imem (input  logic [31:0] a,
 	     output logic [31:0] rd);
    
-   logic [31:0] 		 RAM[1023:0];
+   logic [31:0] 		 RAM[1028:0];
    
    assign rd = RAM[a[31:2]]; // word aligned
    

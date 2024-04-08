@@ -11,10 +11,10 @@ z2
 cModel Technology
 Z0 dC:/Users/shell/Downloads/ecen4243S24/lab3/hdl
 T_opt
-!s110 1711405413
-V=lZiB9aiFSNFn?GjEZAi43
+!s110 1712610848
+V5f5?RgMA_`Ej6?lzC[U9:0
 04 9 4 work testbench fast 0
-=1-ac74b18abb3c-6601f965-4a-8a0
+=1-ac74b18abb3c-66145e20-d5-8a84
 !s124 OEM100
 o-quiet -auto_acc_if_foreign -work work -debugdb +acc
 Z1 tCvgOpt 0
@@ -22,13 +22,13 @@ n@_opt
 OL;O;2021.3;73
 vadder
 Z2 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
-Z3 !s110 1711405412
+Z3 !s110 1712610847
 !i10b 1
 !s100 9>H82RSd_CjU<:WfL2j=M3
 I95BIM?lEV<4RhYml[]UX_2
 S1
 R0
-Z4 w1711405354
+Z4 w1712610821
 Z5 8riscv_pipelined.sv
 Z6 Friscv_pipelined.sv
 !i122 0
@@ -38,9 +38,9 @@ Z8 OL;L;2021.3;73
 r1
 !s85 0
 31
-Z9 !s108 1711405412.000000
+Z9 !s108 1712610847.000000
 Z10 !s107 riscv_pipelined.sv|
-Z11 !s90 riscv_pipelined.sv|
+Z11 !s90 -reportprogress|300|riscv_pipelined.sv|
 !i113 0
 Z12 o-L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
 R1
@@ -120,8 +120,8 @@ vcontroller
 R2
 R3
 !i10b 1
-!s100 >U`<KV__LCBXHR]=n6Ia71
-INXL;UAN47CXmTJZj<Ed>a2
+!s100 B^>0i>5XMRlN<B]6SSZXf0
+I0=m>F<S6QUzgz`aQz0J1g3
 S1
 R0
 R4
@@ -336,8 +336,8 @@ vimem
 R2
 R3
 !i10b 1
-!s100 4^U_LaZmKlSlbhag:98L72
-I0DQWImk8;lYij4QZdz8?d2
+!s100 b6_EOLMDU<6QlI<GWaDAZ1
+IjB?=OVY1VblF3a<4ka4kD1
 S1
 R0
 R4
@@ -480,8 +480,8 @@ vtestbench
 R2
 R3
 !i10b 1
-!s100 f;45@FUOWAg_bziXoS`ND1
-I9G>`:8fnE^:[:j0`_f2ji1
+!s100 SN0ocBPKm@L2`aEWE>T^=0
+I@Kc5;0<K15>@kB0U@l_B`1
 S1
 R0
 R4
