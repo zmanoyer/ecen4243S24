@@ -410,6 +410,10 @@ module datapath(input logic clk, reset,
                       {ALUResultW, ReadDataW, RdW, PCPlus4W});
    mux3   #(32)  resultmux(ALUResultW, ReadDataW, PCPlus4W, ResultSrcW, ResultW);	
 
+
+
+
+
 module storealu (input logic [2:0] StoreControl)
 
 
@@ -462,6 +466,10 @@ if(Load) begin
       else isLoad = 1'b0;
 
 endmodule
+
+
+
+
 
 endmodule
 
