@@ -82,3 +82,5 @@
 # Debug data file does not match loaded design.
 #     while executing
 # "add schematic -full sim:/testbench/dut/rv32pipe"
+# End time: 17:31:28 on Apr 08,2024, Elapsed time: 0:30:00
+# Errors: 2, Warnings: 0
