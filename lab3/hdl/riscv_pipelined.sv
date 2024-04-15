@@ -409,6 +409,60 @@ module datapath(input logic clk, reset,
                       {ALUResultM, ReadDataM, RdM, PCPlus4M},
                       {ALUResultW, ReadDataW, RdW, PCPlus4W});
    mux3   #(32)  resultmux(ALUResultW, ReadDataW, PCPlus4W, ResultSrcW, ResultW);	
+
+module storealu (input logic [2:0] StoreControl)
+
+
+
+module storedec (input logic Store,
+                  input logic [2:0] funct3M,
+                  output logic [2:0] StoreControl,
+                  output logic isStore);
+
+    always_comb
+
+  if(Store) begin
+  case(funct3M)
+      3'b000: begin StoreControl = 3'b000; // SB
+              isStore = 1'b1; end
+      3'b001: begin StoreControl = 3'b001; // SH
+              isStore = 1'b1; end
+      3'b010: begin StoreControl = 3'b100; // SW
+              isStore = 1'b1; end
+      default:StoreControl = 3'bx;
+      endcase
+      end
+      else isStore = 1'b0;
+
+endmodule
+
+ 
+
+module loaddec (input logic Load,
+                  input logic [2:0] funct3M,
+                  output logic [2:0] LoadControl,
+                  output logic isLoad);
+
+    always_comb
+if(Load) begin
+  case(funct3M)
+      3'b000: begin LoadControl = 3'b000; // LB
+              isLoad = 1'b1; end
+      3'b001: begin LoadControl = 3'b001; // LH
+              isLoad = 1'b1; end
+      3'b010: begin LoadControl = 3'b100; // LW
+              isLoad = 1'b1; end
+      3'b100: begin LoadControl = 3'b000; // LBU
+              isLoad = 1'b1; end
+      3'b101: begin LoadControl = 3'b001; // LHU
+              isLoad = 1'b1; end
+      default:LoadControl = 3'bx;
+      endcase
+      end
+      else isLoad = 1'b0;
+
+endmodule
+
 endmodule
 
 // Hazard Unit: forward, stall, and flush
@@ -579,58 +633,7 @@ module branchdec (input logic Branch,
 endmodule
 
 
-module storealu (input logic [2:0] StoreControl)
 
-
-
-module storedec (input logic Store,
-                  input logic [2:0] funct3M,
-                  output logic [2:0] StoreControl,
-                  output logic isStore);
-
-    always_comb
-
-  if(Store) begin
-  case(funct3M)
-      3'b000: begin StoreControl = 3'b000; // SB
-              isStore = 1'b1; end
-      3'b001: begin StoreControl = 3'b001; // SH
-              isStore = 1'b1; end
-      3'b010: begin StoreControl = 3'b100; // SW
-              isStore = 1'b1; end
-      default:StoreControl = 3'bx;
-      endcase
-      end
-      else isStore = 1'b0;
-
-endmodule
-
- 
-
-module loaddec (input logic Load,
-                  input logic [2:0] funct3M,
-                  output logic [2:0] LoadControl,
-                  output logic isLoad);
-
-    always_comb
-if(Load) begin
-  case(funct3M)
-      3'b000: begin LoadControl = 3'b000; // LB
-              isLoad = 1'b1; end
-      3'b001: begin LoadControl = 3'b001; // LH
-              isLoad = 1'b1; end
-      3'b010: begin LoadControl = 3'b100; // LW
-              isLoad = 1'b1; end
-      3'b100: begin LoadControl = 3'b000; // LBU
-              isLoad = 1'b1; end
-      3'b101: begin LoadControl = 3'b001; // LHU
-              isLoad = 1'b1; end
-      default:LoadControl = 3'bx;
-      endcase
-      end
-      else isLoad = 1'b0;
-
-endmodule
 
 
 module imem (input  logic [31:0] a,
