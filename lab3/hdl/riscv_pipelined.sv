@@ -149,7 +149,7 @@ module riscv(input  logic        clk, reset,
    logic 			 funct7b5D;
    logic [2:0] 			 ImmSrcD;
    logic AuipcSrc;
-   logic [2:0]        BranchControl;
+   logic [2:0]        BranchControl, StoreControl, LoadControl;
    logic 			 ZeroE;
    logic 			 PCSrcE;
    logic [3:0] 			 ALUControlE;
@@ -166,14 +166,14 @@ module riscv(input  logic        clk, reset,
    
    controller c(clk, reset,
 		opD, funct3D, funct7b5D, ImmSrcD,
-		FlushE, ZeroE, PCSrcE, ALUControlE, AuipcSrc, BranchControl, ALUSrcE, ResultSrcEb0,
+		FlushE, ZeroE, PCSrcE, ALUControlE, AuipcSrc, BranchControl, StoreControl, LoadControl, ALUSrcE, ResultSrcEb0,
 		MemWriteM, RegWriteM, 
 		RegWriteW, ResultSrcW);
 
    datapath dp(clk, reset,
                StallF, PCF, InstrF,
 	       opD, funct3D, funct7b5D, StallD, FlushD, ImmSrcD,
-	       FlushE, ForwardAE, ForwardBE, PCSrcE, ALUControlE, ALUSrcE, AuipcSrc, BranchControl, ZeroE,
+	       FlushE, ForwardAE, ForwardBE, PCSrcE, ALUControlE, ALUSrcE, AuipcSrc, BranchControl, StoreControl, LoadControl, ZeroE,
                MemWriteM, WriteDataM, ALUResultM, ReadDataM,
                RegWriteW, ResultSrcW,
                Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW);
@@ -196,7 +196,7 @@ module controller(input  logic		 clk, reset,
                   output logic 	     PCSrcE, // for datapath and Hazard Unit
                   output logic [3:0] ALUControlE,
                   output logic       AuipcSrc, 
-                  output logic [2:0] BranchControl,
+                  output logic [2:0] BranchControl, StoreControl, LoadControl,
                   output logic 	     ALUSrcE,
                   output logic 	     ResultSrcEb0, // for Hazard Unit
                   // Memory stage control signals
@@ -213,6 +213,8 @@ module controller(input  logic		 clk, reset,
    logic 			     JumpD, JumpE;
    logic 			     BranchD, BranchE;
    logic           Branch, isBranch;
+   logic           Store, isStore;
+   logic           Load, isLoad;
    logic [2:0] 			     ALUOpD;
    logic [3:0] 			     ALUControlD;
    logic 			     ALUSrcD;
@@ -222,6 +224,8 @@ module controller(input  logic		 clk, reset,
               ALUSrcD, RegWriteD, JumpD, ImmSrcD, ALUOpD, AuipcSrc);
    aludec  ad(opD[5], funct3D, funct7b5D, ALUOpD, ALUControlD);
    branchdec branchdec (Branch, funct3D, BranchControl, isBranch);
+   storedec storedec (Store, funct3D, StoreControl, isStore);
+   loaddec loaddec (Load, funct3D, LoadControl, isLoad);
    
    // Execute stage pipeline control register and logic
    floprc #(11) controlregE(clk, reset, FlushE,
@@ -327,7 +331,7 @@ module datapath(input logic clk, reset,
                 input logic [3:0]   ALUControlE,
                 input logic 	    ALUSrcE,
                 input  logic        AuipcSrc,
-                input  logic [2:0]  BranchControl,
+                input  logic [2:0]  BranchControl, StoreControl, LoadControl,
                 output logic 	    ZeroE,
                 // Memory stage signals
                 input logic 	    MemWriteM, 
@@ -393,6 +397,7 @@ module datapath(input logic clk, reset,
    mux2   #(32)  srcbmux(WriteDataE, ImmExtE, ALUSrcE, SrcBE);
    alu           alu(SrcAE, SrcBE, ALUControlE, ALUResultE, ZeroE);
    adder         branchadd(ImmExtE, PCE, PCTargetE);
+
 
    // Memory stage pipeline register
    flopr  #(101) regM(clk, reset, 
@@ -572,6 +577,61 @@ module branchdec (input logic Branch,
       else isBranch = 1'b0;
 
 endmodule
+
+
+module storealu (input logic [2:0] StoreControl)
+
+
+
+module storedec (input logic Store,
+                  input logic [2:0] funct3M,
+                  output logic [2:0] StoreControl,
+                  output logic isStore);
+
+    always_comb
+
+  if(Store) begin
+  case(funct3M)
+      3'b000: begin StoreControl = 3'b000; // SB
+              isStore = 1'b1; end
+      3'b001: begin StoreControl = 3'b001; // SH
+              isStore = 1'b1; end
+      3'b010: begin StoreControl = 3'b100; // SW
+              isStore = 1'b1; end
+      default:StoreControl = 3'bx;
+      endcase
+      end
+      else isStore = 1'b0;
+
+endmodule
+
+ 
+
+module loaddec (input logic Load,
+                  input logic [2:0] funct3M,
+                  output logic [2:0] LoadControl,
+                  output logic isLoad);
+
+    always_comb
+if(Load) begin
+  case(funct3M)
+      3'b000: begin LoadControl = 3'b000; // LB
+              isLoad = 1'b1; end
+      3'b001: begin LoadControl = 3'b001; // LH
+              isLoad = 1'b1; end
+      3'b010: begin LoadControl = 3'b100; // LW
+              isLoad = 1'b1; end
+      3'b100: begin LoadControl = 3'b000; // LBU
+              isLoad = 1'b1; end
+      3'b101: begin LoadControl = 3'b001; // LHU
+              isLoad = 1'b1; end
+      default:LoadControl = 3'bx;
+      endcase
+      end
+      else isLoad = 1'b0;
+
+endmodule
+
 
 module imem (input  logic [31:0] a,
 	     output logic [31:0] rd);
