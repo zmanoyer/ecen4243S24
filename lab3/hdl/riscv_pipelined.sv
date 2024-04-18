@@ -149,7 +149,7 @@ module riscv(input  logic        clk, reset,
    logic 			 funct7b5D;
    logic [2:0] 			 ImmSrcD;
    logic AuipcSrc;
-   logic [2:0]        BranchControl, StoreControl, LoadControl;
+   logic [2:0]        BranchControl;
    logic 			 ZeroE;
    logic 			 PCSrcE;
    logic [3:0] 			 ALUControlE;
@@ -166,14 +166,14 @@ module riscv(input  logic        clk, reset,
    
    controller c(clk, reset,
 		opD, funct3D, funct7b5D, ImmSrcD,
-		FlushE, ZeroE, PCSrcE, ALUControlE, AuipcSrc, BranchControl, StoreControl, LoadControl, ALUSrcE, ResultSrcEb0,
+		FlushE, ZeroE, PCSrcE, ALUControlE, AuipcSrc, BranchControl, ALUSrcE, ResultSrcEb0,
 		MemWriteM, RegWriteM, 
 		RegWriteW, ResultSrcW);
 
    datapath dp(clk, reset,
                StallF, PCF, InstrF,
 	       opD, funct3D, funct7b5D, StallD, FlushD, ImmSrcD,
-	       FlushE, ForwardAE, ForwardBE, PCSrcE, ALUControlE, ALUSrcE, AuipcSrc, BranchControl, StoreControl, LoadControl, ZeroE,
+	       FlushE, ForwardAE, ForwardBE, PCSrcE, ALUControlE, ALUSrcE, AuipcSrc, BranchControl, ZeroE,
                MemWriteM, WriteDataM, ALUResultM, ReadDataM,
                RegWriteW, ResultSrcW,
                Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW);
@@ -196,7 +196,7 @@ module controller(input  logic		 clk, reset,
                   output logic 	     PCSrcE, // for datapath and Hazard Unit
                   output logic [3:0] ALUControlE,
                   output logic       AuipcSrc, 
-                  output logic [2:0] BranchControl, StoreControl, LoadControl,
+                  output logic [2:0] BranchControl,
                   output logic 	     ALUSrcE,
                   output logic 	     ResultSrcEb0, // for Hazard Unit
                   // Memory stage control signals
@@ -224,8 +224,6 @@ module controller(input  logic		 clk, reset,
               ALUSrcD, RegWriteD, JumpD, ImmSrcD, ALUOpD, AuipcSrc);
    aludec  ad(opD[5], funct3D, funct7b5D, ALUOpD, ALUControlD);
    branchdec branchdec (Branch, funct3D, BranchControl, isBranch);
-   storedec storedec (Store, funct3D, StoreControl, isStore);
-   loaddec loaddec (Load, funct3D, LoadControl, isLoad);
    
    // Execute stage pipeline control register and logic
    floprc #(11) controlregE(clk, reset, FlushE,
@@ -331,7 +329,7 @@ module datapath(input logic clk, reset,
                 input logic [3:0]   ALUControlE,
                 input logic 	    ALUSrcE,
                 input  logic        AuipcSrc,
-                input  logic [2:0]  BranchControl, StoreControl, LoadControl,
+                input  logic [2:0]  BranchControl,
                 output logic 	    ZeroE,
                 // Memory stage signals
                 input logic 	    MemWriteM, 
@@ -398,78 +396,95 @@ module datapath(input logic clk, reset,
    alu           alu(SrcAE, SrcBE, ALUControlE, ALUResultE, ZeroE);
    adder         branchadd(ImmExtE, PCE, PCTargetE);
 
-
    // Memory stage pipeline register
    flopr  #(101) regM(clk, reset, 
                       {ALUResultE, WriteDataE, RdE, PCPlus4E},
-                      {ALUResultM, WriteDataM, RdM, PCPlus4M});
-   
+                      {ALUResultM, newWriteDataM, RdM, PCPlus4M});
+
+   subwordread    load(funct3M, ALUResultM, ReadDataM, newReadDataM);
+   subwordwrite   store(funct3M, ALUResultM, ReadDataM, WriteDataM, newWriteDataM);
+
    // Writeback stage pipeline register and logic
    flopr  #(101) regW(clk, reset, 
-                      {ALUResultM, ReadDataM, RdM, PCPlus4M},
+                      {ALUResultM, newReadDataM, RdM, PCPlus4M},
                       {ALUResultW, ReadDataW, RdW, PCPlus4W});
    mux3   #(32)  resultmux(ALUResultW, ReadDataW, PCPlus4W, ResultSrcW, ResultW);	
+ endmodule
 
+// Load
+module subwordread (input logic [2:0] funct3M,
+                    input logic [31:0] ALUResultM,
+                    input logic [31:0] ReadDataM,
+                    output logic [31:0] newReadDataM);
 
+  logic [7:0] lb;
+  logic [15:0] lh;
+  logic [31:0] lw;
+  logic [1:0] offset;
 
+  assign offset = ALUResultM[1:0];
+  assign lw = ReadDataM[31:0];
 
+  always_comb // LB,LBU
+    case(offset)
+      2'b00: lb = ReadDataM[7:0];
+      2'b01: lb = ReadDataM[15:8];
+      2'b10: lb = ReadDataM[23:16];
+      2'b11: lb = ReadDataM[31:24];
+    endcase
 
-module storealu (input logic [2:0] StoreControl)
-
-
-
-module storedec (input logic Store,
-                  input logic [2:0] funct3M,
-                  output logic [2:0] StoreControl,
-                  output logic isStore);
-
-    always_comb
-
-  if(Store) begin
-  case(funct3M)
-      3'b000: begin StoreControl = 3'b000; // SB
-              isStore = 1'b1; end
-      3'b001: begin StoreControl = 3'b001; // SH
-              isStore = 1'b1; end
-      3'b010: begin StoreControl = 3'b100; // SW
-              isStore = 1'b1; end
-      default:StoreControl = 3'bx;
-      endcase
-      end
-      else isStore = 1'b0;
-
-endmodule
-
- 
-
-module loaddec (input logic Load,
-                  input logic [2:0] funct3M,
-                  output logic [2:0] LoadControl,
-                  output logic isLoad);
-
-    always_comb
-if(Load) begin
-  case(funct3M)
-      3'b000: begin LoadControl = 3'b000; // LB
-              isLoad = 1'b1; end
-      3'b001: begin LoadControl = 3'b001; // LH
-              isLoad = 1'b1; end
-      3'b010: begin LoadControl = 3'b100; // LW
-              isLoad = 1'b1; end
-      3'b100: begin LoadControl = 3'b000; // LBU
-              isLoad = 1'b1; end
-      3'b101: begin LoadControl = 3'b001; // LHU
-              isLoad = 1'b1; end
-      default:LoadControl = 3'bx;
-      endcase
-      end
-      else isLoad = 1'b0;
+   always_comb
+    case(offset)
+      2'b00: lh = ReadDataM[15:0];
+      2'b01: lh = ReadDataM[31:6];
+    endcase
+  
+  always_comb
+    case(funct3M)
+      3'b000: newReadDataM = {{24{lb[7]}}, lb};   // LB
+      3'b001: newReadDataM = {{16{lh[15]}}, lh};  // LH
+      3'b010: newReadDataM = lw;                  // LW
+      3'b100: newReadDataM = {24'b0, lb};         // LBU
+      3'b101: newReadDataM = {16'b0, lh};         // LHU
+    endcase
 
 endmodule
 
+// Store
+module subwordwrite (input logic [2:0] funct3M,
+                    input logic [31:0] ALUResultM,
+                    input logic [31:0] ReadDataM,
+                    input logic [31:0] WriteDataM,
+                    output logic [31:0] newWriteDataM);
 
+  logic [1:0] offset;
+  logic [31:0] sb;
+  logic [31:0] sh;
+  logic [31:0] sw;
 
+  assign offset   = ALUResultM[1:0];
+  assign sw = WriteDataM[31:0];
 
+  always_comb // SB
+    case(offset)
+      2'b00: sb = {ReadDataM[31:8], WriteDataM[7:0]};
+      2'b01: sb = {ReadDataM[31:16], WriteDataM[7:0], ReadDataM[7:0]};
+      2'b10: sb = {ReadDataM[31:24], WriteDataM[7:0], ReadDataM[15:0]};
+      2'b11: sb = {WriteDataM[7:0], ReadDataM[23:0]};
+  endcase
+
+ always_comb // SH
+    case(offset)
+      2'b00: sh = {ReadDataM[31:16],WriteDataM[15:0]};
+      2'b01: sh = {ReadDataM[15:0],WriteDataM[31:16]};
+    endcase
+
+  always_comb
+    case(funct3M)
+      3'b000: newWriteDataM = sb; // SB
+      3'b001: newWriteDataM = sh; // SH
+      3'b010: newWriteDataM = sw; // SW
+    endcase
 
 endmodule
 
@@ -639,10 +654,6 @@ module branchdec (input logic Branch,
       else isBranch = 1'b0;
 
 endmodule
-
-
-
-
 
 module imem (input  logic [31:0] a,
 	     output logic [31:0] rd);
