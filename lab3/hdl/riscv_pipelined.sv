@@ -92,7 +92,7 @@ module testbench();
    initial
      begin
 	string memfilename;
-        memfilename = {"../../lab1/testing/sw.memfile"};
+        memfilename = {"../../lab1/testing/sb.memfile"};
 	$readmemh(memfilename, dut.imem.RAM);
      end
    
@@ -128,6 +128,9 @@ module top(input  logic        clk, reset,
            output logic        MemWriteM);
 
    logic [31:0] 	       PCF, InstrF, ReadDataM;
+   logic [2:0] funct3M;
+   logic [31:0] newReadDataM;
+   logic [31:0] newWriteDataM;
    
    // instantiate processor and memories
    riscv rv32pipe (clk, reset, PCF, InstrF, MemWriteM, DataAdrM, 
@@ -163,6 +166,10 @@ module riscv(input  logic        clk, reset,
    logic 			 StallF, StallD, FlushD, FlushE;
 
    logic [4:0] 			 Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW;
+
+   logic [2:0] funct3M;
+   logic [31:0] newReadDataM;
+   logic [31:0] newWriteDataM;
    
    controller c(clk, reset,
 		opD, funct3D, funct7b5D, ImmSrcD,
@@ -174,7 +181,7 @@ module riscv(input  logic        clk, reset,
                StallF, PCF, InstrF,
 	       opD, funct3D, funct7b5D, StallD, FlushD, ImmSrcD,
 	       FlushE, ForwardAE, ForwardBE, PCSrcE, ALUControlE, ALUSrcE, AuipcSrc, BranchControl, ZeroE,
-               MemWriteM, WriteDataM, ALUResultM, ReadDataM,
+               MemWriteM, WriteDataM, ALUResultM, ReadDataM, funct3M, newReadDataM, newWriteDataM,
                RegWriteW, ResultSrcW,
                Rs1D, Rs2D, Rs1E, Rs2E, RdE, RdM, RdW);
 
@@ -335,6 +342,11 @@ module datapath(input logic clk, reset,
                 input logic 	    MemWriteM, 
                 output logic [31:0] WriteDataM, ALUResultM,
                 input logic [31:0]  ReadDataM,
+
+                input logic [2:0] funct3M,
+                input logic [31:0] newReadDataM,
+                output logic [31:0] newWriteDataM,
+
                 // Writeback stage signals
                 input logic 	    RegWriteW, 
                 input logic [1:0]   ResultSrcW,
@@ -399,7 +411,7 @@ module datapath(input logic clk, reset,
    // Memory stage pipeline register
    flopr  #(101) regM(clk, reset, 
                       {ALUResultE, WriteDataE, RdE, PCPlus4E},
-                      {ALUResultM, newWriteDataM, RdM, PCPlus4M});
+                      {ALUResultM, WriteDataM, RdM, PCPlus4M});
 
    subwordread    load(funct3M, ALUResultM, ReadDataM, newReadDataM);
    subwordwrite   store(funct3M, ALUResultM, ReadDataM, WriteDataM, newWriteDataM);
